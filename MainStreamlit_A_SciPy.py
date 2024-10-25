@@ -4,10 +4,10 @@ import pickle
 from streamlit_option_menu import option_menu
 
 # Load prediction models
-with open("/mnt/data/LR_Properti_model.pkl", "rb") as file:
+with open("BestModel_CLF_RF_SciPy.pkl", "rb") as file:
     lr_model = pickle.load(file)
 
-with open("/mnt/data/RF_Uts_model.pkl", "rb") as file:
+with open("BestModel_REG_Lasso_SciPy.pkl", "rb") as file:
     rf_model = pickle.load(file)
 
 # Load dataset if needed
