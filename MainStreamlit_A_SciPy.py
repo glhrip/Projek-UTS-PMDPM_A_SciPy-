@@ -3,27 +3,22 @@ import pandas as pd
 import pickle
 from streamlit_option_menu import option_menu
 
-# Load prediction models
 with open("BestModel_CLF_RF_SciPy.pkl", "rb") as file:
     rf_model = pickle.load(file)
 
 with open("BestModel_REG_Lasso_SciPy.pkl", "rb") as file:
     lr_model = pickle.load(file)
 
-# Load dataset if needed
 data = pd.read_csv("Dataset UTS_Gasal 2425.csv")
 
-# Sidebar menu
 with st.sidebar:
     selected = option_menu('Streamlit UTS ML 24/25',
                            ['Klasifikasi', 'Regresi', 'Catatan'],
                            default_index=0)
 
-# Klasifikasi Properti
 if selected == 'Klasifikasi':
     st.title('Klasifikasi Properti')
 
-    # Input features
     squaremeters = st.slider("Squaremeters", 0, 100000)
     numberofrooms = st.slider("Number of Rooms", 0, 100)
     hasyard = st.radio("Has Yard?", ["Yes", "No"])
@@ -41,7 +36,6 @@ if selected == 'Klasifikasi':
     hasstorageroom = st.radio("Has Storage Room?", ["Yes", "No"])
     hasguestroom = st.number_input("Number of Guest Rooms", 0)
 
-    # Convert categorical features to binary
     data_input = pd.DataFrame([[squaremeters, numberofrooms, hasyard == "Yes", haspool == "Yes", floors,
                                 citycode, citypartrange, numprevowners, made, isnewbuilt == "New",
                                 hasstormprotector == "Yes", basement, attic, garage, 
@@ -51,7 +45,6 @@ if selected == 'Klasifikasi':
                                        'isnewbuilt', 'hasstormprotector', 'basement', 'attic', 
                                        'garage', 'hasstorageroom', 'hasguestroom'])
 
-    # Predict button
     if st.button("Prediksi Kategori"):
         try:
             kategori = rf_model.predict(data_input)[0]
@@ -59,11 +52,9 @@ if selected == 'Klasifikasi':
         except ValueError as e:
             st.error(f"Error dalam prediksi: {e}")
 
-# Regresi Harga Properti
 if selected == 'Regresi':
     st.title('Regresi Harga Properti')
 
-    # Reuse inputs for regression model
     squaremeters = st.slider("Squaremeters", 0, 100000)
     numberofrooms = st.slider("Number of Rooms", 0, 100)
     hasyard = st.radio("Has Yard?", ["Yes", "No"])
@@ -81,7 +72,6 @@ if selected == 'Regresi':
     hasstorageroom = st.radio("Has Storage Room?", ["Yes", "No"])
     hasguestroom = st.number_input("Number of Guest Rooms", 0)
 
-    # Convert categorical features to binary
     data_input = pd.DataFrame([[squaremeters, numberofrooms, hasyard == "Yes", haspool == "Yes", floors,
                                 citycode, citypartrange, numprevowners, made, isnewbuilt == "New",
                                 hasstormprotector == "Yes", basement, attic, garage, 
@@ -91,7 +81,6 @@ if selected == 'Regresi':
                                        'isnewbuilt', 'hasstormprotector', 'basement', 'attic', 
                                        'garage', 'hasstorageroom', 'hasguestroom'])
 
-    # Predict button
     if st.button("Prediksi Harga"):
         try:
             harga = lr_model.predict(data_input)[0]
@@ -99,7 +88,6 @@ if selected == 'Regresi':
         except ValueError as e:
             st.error(f"Error dalam prediksi: {e}")
 
-# Halaman Catatan
 if selected == 'Catatan':
     st.title('Catatan')
     st.write('''
