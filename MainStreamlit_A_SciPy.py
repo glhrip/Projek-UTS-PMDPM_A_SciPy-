@@ -1,77 +1,61 @@
 import streamlit as st
-from streamlit_option_menu import option_menu
+import pandas as pd
+import numpy as np
+import pickle
 
+# Load model prediksi
+model_kategori = pickle.load(open('model_kategori.pkl', 'rb'))
+model_harga = pickle.load(open('model_harga.pkl', 'rb'))
+
+# Sidebar menu
 with st.sidebar:
-    selected = option_menu('Tutorial Desain Streamlit UTS ML 24/25',
-                           ['Klasifikasi',
-                            'Regresi', 'Catatan'],
-                            default_index=0)
+    selected = st.selectbox("Pilih Menu", ["Prediksi Kategori Properti", "Prediksi Harga Properti"])
 
-if selected == 'Klasifikasi':
-    st.title('Klasifikasi')
+# Fungsi untuk prediksi kategori properti
+def prediksi_kategori(data):
+    pred = model_kategori.predict(data)
+    return pred[0]
 
-    st.write('Untuk Inputan File dataset (csv) bisa menggunakan st.file_uploader')
-    file = st.file_uploader("Masukkan File", type=["csv", "txt"])
-    st.write('Untuk usia bisa menggunakan st.slider')
-    Age = st.slider("Age", 0, 100)
-    st.write('Untuk jenis kelamin bisa menggunakan st.radio')
-    Sex = st.radio("Gender", ["Female", "Male"])
-    st.write('Untuk beberapa kolom bisa menggunakan st.selectbox')
-    nama_kolom = st.selectbox("Nama Kolom", ["Under", "Normal", "Over"])
+# Fungsi untuk prediksi harga properti
+def prediksi_harga(data):
+    pred = model_harga.predict(data)
+    return pred[0]
+
+# Tampilan aplikasi berdasarkan menu yang dipilih
+if selected == "Prediksi Kategori Properti":
+    st.title("Prediksi Kategori Properti")
     
-    # Input untuk panjang dan lebar
-    st.write('Untuk inputan manual bisa menggunakan st.number_input')
-    panjang = st.number_input("Masukan Input", 0)
-    lebar = st.number_input("Masukan Nilai Lebar", 0)
-
-    # Input jawaban dari pengguna
-    jawaban = st.number_input("Masukan Jawaban Anda", min_value=0)
-    st.write('Tombol button (Menggunakan st.button)')
+    # Input fitur (sesuaikan dengan model Anda)
+    luas_bangunan = st.number_input("Luas Bangunan (m2)", min_value=0.0)
+    luas_tanah = st.number_input("Luas Tanah (m2)", min_value=0.0)
+    jumlah_kamar = st.slider("Jumlah Kamar", 1, 10)
+    lokasi = st.selectbox("Lokasi Properti", ["Jakarta", "Bandung", "Surabaya", "Yogyakarta"])
     
-    # Tombol untuk menghitung luas
-    hitung = st.button("Prediksi")
-
-    if hitung:
-        luas_benar = panjang * lebar
-        st.write(f"Panjang: {panjang}, Lebar: {lebar}")
-
-        if jawaban == luas_benar:
-            st.success(f"Benar! Luas Persegi Panjang adalah {luas_benar}.")
-        else:
-            st.error(f"Salah! Luas Persegi Panjang yang benar adalah {luas_benar}.")
-
-if selected == 'Regresi':
-    st.title('Regresi')
-
-    st.write('Untuk Inputan File dataset (csv) bisa menggunakan st.file_uploader')
-    file = st.file_uploader("Masukkan File", type=["csv", "txt"])
-    st.write('Untuk usia bisa menggunakan st.slider')
-    Age = st.slider("Age", 0, 100)
-    st.write('Untuk jenis kelamin bisa menggunakan st.radio')
-    Sex = st.radio("Gender", ["Female", "Male"])
-    st.write('Untuk beberapa kolom bisa menggunakan st.selectbox')
-    nama_kolom = st.selectbox("Nama Kolom", ["Under", "Normal", "Over"])
+    # Preprocessing input (contoh, sesuaikan dengan kebutuhan model Anda)
+    data = pd.DataFrame([[luas_bangunan, luas_tanah, jumlah_kamar, lokasi]], 
+                        columns=['luas_bangunan', 'luas_tanah', 'jumlah_kamar', 'lokasi'])
     
-    # Input untuk panjang dan lebar
-    st.write('Untuk inputan manual bisa menggunakan st.number_input')
-    panjang = st.number_input("Masukan Input", 0)
-    lebar = st.number_input("Masukan Nilai Lebar", 0)
+    # Tombol prediksi
+    if st.button("Prediksi Kategori"):
+        hasil = prediksi_kategori(data)
+        st.success(f"Kategori Properti: {hasil}")
+
+elif selected == "Prediksi Harga Properti":
+    st.title("Prediksi Harga Properti")
     
-    alas = st.slider("Masukkan Nilai Alas", 0, 100)
-    tinggi = st.slider("Masukkan Nilai Tinggi", 0, 100)
-    st.write('Tombol button (Menggunakan st.button)')
-    hitung = st.button("Prediksi")
+    # Input fitur (sesuaikan dengan model Anda)
+    luas_bangunan = st.number_input("Luas Bangunan (m2)", min_value=0.0)
+    luas_tanah = st.number_input("Luas Tanah (m2)", min_value=0.0)
+    jumlah_kamar = st.slider("Jumlah Kamar", 1, 10)
+    lokasi = st.selectbox("Lokasi Properti", ["Jakarta", "Bandung", "Surabaya", "Yogyakarta"])
+    
+    # Preprocessing input (contoh, sesuaikan dengan kebutuhan model Anda)
+    data = pd.DataFrame([[luas_bangunan, luas_tanah, jumlah_kamar, lokasi]], 
+                        columns=['luas_bangunan', 'luas_tanah', 'jumlah_kamar', 'lokasi'])
+    
+    # Tombol prediksi
+    if st.button("Prediksi Harga"):
+        harga = prediksi_harga(data)
+        st.success(f"Harga Properti: Rp {harga:,.0f}")
 
-    if hitung:
-        luas = 0.5 * alas * tinggi
-        st.write("Luas Segitiga Adalah", luas)
-
-# Halaman ketentuan
-if selected == 'Catatan':
-    st.title('Catatan')
-    st.write('''1. Untuk memunculkan sidebar agar tidak error ketika di run, silahkan install library streamlit option menu di terminal dengan perintah "pip install streamlit-option-menu".')
-    st.write('2. Menu yang dibuat ada 2 yaitu Klasifikasi dan Regresi.''')
-    st.write('3. Inputnya apa saja, sesuaikan dengan arsitektur code anda pada notebook.')
-    st.write('4. Referensi desain streamlit dapat di akses pada https://streamlit.io/')
-    st.write('5. Link streamlit design ini dapat di akses pada https://apputs-6qzfrvr4ufiyzhj84mrfkt7.streamlit.app/')
-    st.write('''6. Library dan file requirements yang dibutuhkan untuk deploy online di github ada 5 yaitu streamlit, scikit-learn, pandas, numpy, streamlit-option-menu.''')
+# Catatan: Sesuaikan input, fitur, dan preprocessing berdasarkan model yang Anda gunakan.
