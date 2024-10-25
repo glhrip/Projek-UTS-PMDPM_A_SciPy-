@@ -1,51 +1,122 @@
-Modelimport streamlit as st
+import streamlit as st
 import pandas as pd
-import numpy as np
 import pickle
+from streamlit_option_menu import option_menu
 
-# Load pre-trained models (pastikan file model tersedia di direktori)
-with open("NestModel_kategori.pkl", "rb") as file:
-    kategori_model = pickle.load(file)
+# Load prediction models
 
-with open("model_harga.pkl", "rb") as file:
-    harga_model = pickle.load(file)
+with open("/mnt/data/BestModel_CLF_RF_SciPy.pkl", "rb") as file:
+    lr_model = pickle.load(file)
 
-st.sidebar.title("Sistem Prediksi Properti PT. Ayodya Property")
-pilihan = st.sidebar.radio("Pilih Menu", ["Prediksi Kategori Properti", "Prediksi Harga Properti"])
+with open("/mnt/data/BestModel_REG_Lasso_SciPy.pkl", "rb") as file:
+    rf_model = pickle.load(file)
 
-def encode_input(yes_no_value):
-    return 1 if yes_no_value == "Yes" else 0
+# Load dataset if needed
+data = pd.read_csv("/mnt/data/Dataset UTS_Gasal 2425.csv")
 
-# Halaman Prediksi Kategori Properti
-if pilihan == "Prediksi Kategori Properti":
-    st.title("Prediksi Kategori Properti")
+# Sidebar menu
+with st.sidebar:
+    selected = option_menu('Streamlit UTS ML 24/25',
+                           ['Klasifikasi',
+                            'Regresi', 'Catatan'],
+                            default_index=0)
 
-    luas_tanah = st.number_input("Luas Tanah (m²)", min_value=0.0)
-    jumlah_kamar = st.slider("Jumlah Kamar", 1, 10)
-    haspool = st.selectbox("Ada Kolam Renang?", ["Yes", "No"])
-    citycode = st.number_input("Kode Kota", min_value=0)
-    floors = st.number_input("Jumlah Lantai", min_value=1)
+# Klasifikasi Properti
+if selected == 'Klasifikasi':
+    st.title('Klasifikasi Properti')
 
-    input_data = np.array([[luas_tanah, jumlah_kamar, encode_input(haspool), citycode, floors]]).reshape(1, -1)
+    # Input features
+    squaremeters = st.slider("Squaremeters", 0, 100000)
+    numberofrooms = st.slider("Number of Rooms", 0, 100)
+    hasyard = st.radio("Has Yard?", ["Yes", "No"])
+    haspool = st.radio("Has Pool?", ["Yes", "No"])
+    floors = st.number_input("Floors", 0)
+    citycode = st.number_input("City Code", 0)
+    citypartrange = st.number_input("City Part Range", 0)
+    numprevowners = st.number_input("Number of Previous Owners", 0)
+    made = st.number_input("Year Built", 0)
+    isnewbuilt = st.radio("Is New Built?", ["New", "Old"])
+    hasstormprotector = st.radio("Has Storm Protector?", ["Yes", "No"])
+    basement = st.number_input("Basement Area", 0)
+    attic = st.number_input("Attic Area", 0)
+    garage = st.number_input("Garage Area", 0)
+    hasstorageroom = st.radio("Has Storage Room?", ["Yes", "No"])
+    hasguestroom = st.number_input("Number of Guest Rooms", 0)
 
+    # Convert categorical features to binary
+    data_input = pd.DataFrame([[squaremeters, numberofrooms, hasyard == "Yes", haspool == "Yes", floors,
+                                citycode, citypartrange, numprevowners, made, isnewbuilt == "New",
+                                hasstormprotector == "Yes", basement, attic, garage, 
+                                hasstorageroom == "Yes", hasguestroom]],
+                              columns=['squaremeters', 'numberofrooms', 'hasyard', 'haspool', 'floors',
+                                       'citycode', 'citypartrange', 'numprevowners', 'made', 
+                                       'isnewbuilt', 'hasstormprotector', 'basement', 'attic', 
+                                       'garage', 'hasstorageroom', 'hasguestroom'])
+
+    # Debugging Output: Show data input shape and contents
+    st.write("Input Data Shape:", data_input.shape)
+    st.write("Input Data Preview:", data_input)
+
+    # Predict button
     if st.button("Prediksi Kategori"):
-        kategori = kategori_model.predict(input_data)[0]
-        st.success(f"Kategori Properti: {kategori}")
+        try:
+            kategori = rf_model.predict(data_input)[0]
+            st.success(f"Kategori Properti: {kategori}")
+        except ValueError as e:
+            st.error(f"ValueError: {e}")
 
-# Halaman Prediksi Harga Properti
-elif pilihan == "Prediksi Harga Properti":
-    st.title("Prediksi Harga Properti")
+# Regresi Harga Properti
+if selected == 'Regresi':
+    st.title('Regresi Harga Properti')
 
-    squaremeters = st.number_input("Luas Tanah (m²)", min_value=0.0)
-    numberofrooms = st.number_input("Jumlah Kamar", min_value=1)
-    hasyard = st.selectbox("Ada Halaman?", ["Yes", "No"])
-    isnewbuilt = st.selectbox("Properti Baru?", ["Yes", "No"])
-    attic = st.number_input("Luas Loteng (m²)", min_value=0.0)
-    garage = st.number_input("Luas Garasi (m²)", min_value=0.0)
+    # Reuse inputs for regression model
+    squaremeters = st.slider("Squaremeters", 0, 100000)
+    numberofrooms = st.slider("Number of Rooms", 0, 100)
+    hasyard = st.radio("Has Yard?", ["Yes", "No"])
+    haspool = st.radio("Has Pool?", ["Yes", "No"])
+    floors = st.number_input("Floors", 0)
+    citycode = st.number_input("City Code", 0)
+    citypartrange = st.number_input("City Part Range", 0)
+    numprevowners = st.number_input("Number of Previous Owners", 0)
+    made = st.number_input("Year Built", 0)
+    isnewbuilt = st.radio("Is New Built?", ["New", "Old"])
+    hasstormprotector = st.radio("Has Storm Protector?", ["Yes", "No"])
+    basement = st.number_input("Basement Area", 0)
+    attic = st.number_input("Attic Area", 0)
+    garage = st.number_input("Garage Area", 0)
+    hasstorageroom = st.radio("Has Storage Room?", ["Yes", "No"])
+    hasguestroom = st.number_input("Number of Guest Rooms", 0)
 
-    input_data = np.array([[squaremeters, numberofrooms, encode_input(hasyard), 
-                            encode_input(isnewbuilt), attic, garage]]).reshape(1, -1)
+    # Convert categorical features to binary
+    data_input = pd.DataFrame([[squaremeters, numberofrooms, hasyard == "Yes", haspool == "Yes", floors,
+                                citycode, citypartrange, numprevowners, made, isnewbuilt == "New",
+                                hasstormprotector == "Yes", basement, attic, garage, 
+                                hasstorageroom == "Yes", hasguestroom]],
+                              columns=['squaremeters', 'numberofrooms', 'hasyard', 'haspool', 'floors',
+                                       'citycode', 'citypartrange', 'numprevowners', 'made', 
+                                       'isnewbuilt', 'hasstormprotector', 'basement', 'attic', 
+                                       'garage', 'hasstorageroom', 'hasguestroom'])
 
+    # Debugging Output: Show data input shape and contents
+    st.write("Input Data Shape:", data_input.shape)
+    st.write("Input Data Preview:", data_input)
+
+    # Predict button
     if st.button("Prediksi Harga"):
-        harga = harga_model.predict(input_data)[0]
-        st.success(f"Estimasi Harga Properti: Rp {harga:,.2f}")
+        try:
+            harga = lr_model.predict(data_input)[0]
+            st.success(f"Harga Properti: Rp {harga:,.0f}")
+        except ValueError as e:
+            st.error(f"ValueError: {e}")
+
+# Halaman Catatan
+if selected == 'Catatan':
+    st.title('Catatan')
+    st.write('''
+    1. Untuk memunculkan sidebar agar tidak error ketika di run, silahkan install library streamlit option menu di terminal dengan perintah "pip install streamlit-option-menu".
+    2. Menu yang dibuat ada 2 yaitu Klasifikasi dan Regresi.
+    3. Inputnya apa saja, sesuaikan dengan arsitektur code anda pada notebook.
+    4. Referensi desain streamlit dapat di akses pada https://streamlit.io/
+    5. Link streamlit design ini dapat di akses pada https://apputs-6qzfrvr4ufiyzhj84mrfkt7.streamlit.app/
+    6. Library dan file requirements yang dibutuhkan untuk deploy online di github ada 5 yaitu streamlit, scikit-learn, pandas, numpy, streamlit-option-menu.
+    ''')\
