@@ -3,9 +3,9 @@ import pandas as pd
 import pickle
 
 # Load prediction models
-with open('/mnt/data/BestModel_CLF_RF_SciPy.pkl', 'rb') as file:
+with open('BestModel_CLF_RF_SciPy.pkl', 'rb') as file:
     model_kategori = pickle.load(file)
-with open('/mnt/data/BestModel_REG_Lasso_SciPy.pkl', 'rb') as file:
+with open('BestModel_REG_Lasso_SciPy.pkl', 'rb') as file:
     model_harga = pickle.load(file)
 
 # Sidebar menu
