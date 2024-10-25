@@ -54,7 +54,7 @@ if selected == 'Analisis Kategori Properti':
         kategori_properti = kategori_map.get(prediction, "Tidak Diketahui")
         st.success(f"Kategori properti: *{kategori_properti}*")
 
-if selected == 'Regresi':
+if selected == 'Analisis Harga Properti':
     st.title('Regresi')
 
     st.write('Untuk Inputan File dataset (csv) bisa menggunakan st.file_uploader')
