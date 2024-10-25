@@ -1,60 +1,49 @@
 import streamlit as st
 import pandas as pd
 import pickle
+from streamlit_option_menu import option_menu
 
-# Load prediction models
-with open('BestModel_CLF_RF_SciPy.pkl', 'rb') as file:
-    model_kategori = pickle.load(file)
-with open('BestModel_REG_Lasso_SciPy.pkl', 'rb') as file:
-    model_harga = pickle.load(file)
+with open("/mnt/data/LR_Properti_model.pkl", "rb") as file:
+    lr_model = pickle.load(file)
 
-# Sidebar menu
+with open("/mnt/data/RF_Uts_model.pkl", "rb") as file:
+    rf_model = pickle.load(file)
+
+data = pd.read_csv("/mnt/data/Dataset UTS_Gasal 2425.csv")
+
 with st.sidebar:
-    selected = st.selectbox("Pilih Menu", ["Prediksi Kategori Properti", "Prediksi Harga Properti"])
+    selected = option_menu('Tutorial Desain Streamlit UTS ML 24/25',
+                           ['Klasifikasi', 'Regresi'],
+                           default_index=0)
 
-# Function to predict property category
-def prediksi_kategori(data):
-    pred = model_kategori.predict(data)
-    return pred[0]
+if selected == 'Klasifikasi':
+    st.title('Klasifikasi')
+    
+    st.write("Silakan upload file dataset Anda (format csv).")
+    uploaded_file = st.file_uploader("Pilih file", type=["csv", "txt"])
+    
+    if uploaded_file:
+        dataset = pd.read_csv(uploaded_file)
+        st.write("Dataset yang diunggah:")
+        st.dataframe(dataset.head())
 
-# Function to predict property price
-def prediksi_harga(data):
-    pred = model_harga.predict(data)
-    return pred[0]
+    st.write("Masukkan data yang diperlukan untuk prediksi klasifikasi:")
+    feature = st.selectbox("Pilih Fitur Utama", ["Under", "Normal", "Over"])
+    
+    if st.button("Prediksi Klasifikasi"):
+        pred_input = [[feature]]  
+        prediction = lr_model.predict(pred_input)
+        st.write(f"Hasil prediksi klasifikasi: {prediction}")
 
-# Display application based on selected menu
-if selected == "Prediksi Kategori Properti":
-    st.title("Prediksi Kategori Properti")
+if selected == 'Regresi':
+    st.title('Regresi')
     
-    # Input features
-    luas_bangunan = st.number_input("Luas Bangunan (m2)", min_value=0.0)
-    luas_tanah = st.number_input("Luas Tanah (m2)", min_value=0.0)
-    jumlah_kamar = st.slider("Jumlah Kamar", 1, 10)
-    lokasi = st.selectbox("Lokasi Properti", ["Jakarta", "Bandung", "Surabaya", "Yogyakarta"])
+    st.write("Masukkan data yang diperlukan untuk prediksi regresi:")
+    ukuran = st.slider("Ukuran Properti (m²)", 0, 500)
+    kamar_tidur = st.slider("Jumlah Kamar Tidur", 1, 10)
+    kamar_mandi = st.slider("Jumlah Kamar Mandi", 1, 5)
     
-    # Preprocess input (adjust according to model requirements)
-    data = pd.DataFrame([[luas_bangunan, luas_tanah, jumlah_kamar, lokasi]], 
-                        columns=['luas_bangunan', 'luas_tanah', 'jumlah_kamar', 'lokasi'])
-    
-    # Predict button
-    if st.button("Prediksi Kategori"):
-        hasil = prediksi_kategori(data)
-        st.success(f"Kategori Properti: {hasil}")
-
-elif selected == "Prediksi Harga Properti":
-    st.title("Prediksi Harga Properti")
-    
-    # Input features
-    luas_bangunan = st.number_input("Luas Bangunan (m2)", min_value=0.0)
-    luas_tanah = st.number_input("Luas Tanah (m2)", min_value=0.0)
-    jumlah_kamar = st.slider("Jumlah Kamar", 1, 10)
-    lokasi = st.selectbox("Lokasi Properti", ["Jakarta", "Bandung", "Surabaya", "Yogyakarta"])
-    
-    # Preprocess input (adjust according to model requirements)
-    data = pd.DataFrame([[luas_bangunan, luas_tanah, jumlah_kamar, lokasi]], 
-                        columns=['luas_bangunan', 'luas_tanah', 'jumlah_kamar', 'lokasi'])
-    
-    # Predict button
-    if st.button("Prediksi Harga"):
-        harga = prediksi_harga(data)
-        st.success(f"Harga Properti: Rp {harga:,.0f}")
+    if st.button("Prediksi Harga Properti"):
+        reg_input = [[ukuran, kamar_tidur, kamar_mandi]]
+        price_prediction = rf_model.predict(reg_input)
+        st.write(f"Prediksi harga properti: Rp {price_prediction[0]:,.2f}")
