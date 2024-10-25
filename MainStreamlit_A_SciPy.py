@@ -9,8 +9,6 @@ with open("BestModel_REG_Lasso_SciPy.pkl", "rb") as file:
 with open("BestModel_CLF_RF_SciPy.pkl", "rb") as file:
     rf_model = pickle.load(file)
 
-data = pd.read_csv("/mnt/data/Dataset UTS_Gasal 2425.csv")
-
 with st.sidebar:
     selected = option_menu('Tutorial Desain Streamlit UTS ML 24/25',
                            ['Klasifikasi', 'Regresi'],
