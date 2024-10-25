@@ -5,7 +5,7 @@ import pickle
 
 # Load model prediksi
 model_kategori = pickle.load(open('BestModel_CLF_RF_SciPy.pkl', 'rb'))
-model_harga = pickle.load(open('BestModel_Lasso_SciPy.pkl', 'rb'))
+model_harga = pickle.load(open('BestModel_REG_Lasso_SciPy.pkl', 'rb'))
 
 # Sidebar menu
 with st.sidebar:
