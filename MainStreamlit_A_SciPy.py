@@ -1,10 +1,10 @@
-import streamlit as st
+Modelimport streamlit as st
 import pandas as pd
 import numpy as np
 import pickle
 
 # Load pre-trained models (pastikan file model tersedia di direktori)
-with open("model_kategori.pkl", "rb") as file:
+with open("NestModel_kategori.pkl", "rb") as file:
     kategori_model = pickle.load(file)
 
 with open("model_harga.pkl", "rb") as file:
