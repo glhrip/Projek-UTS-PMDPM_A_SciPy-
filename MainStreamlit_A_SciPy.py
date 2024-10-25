@@ -4,22 +4,20 @@ import pickle
 from streamlit_option_menu import option_menu
 
 # Load prediction models
-
-with open("/mnt/data/BestModel_CLF_RF_SciPy.pkl", "rb") as file:
-    lr_model = pickle.load(file)
-
-with open("/mnt/data/BestModel_REG_Lasso_SciPy.pkl", "rb") as file:
+with open("BestModel_CLF_RF_SciPy.pkl", "rb") as file:
     rf_model = pickle.load(file)
 
+with open("BestModel_REG_Lasso_SciPy.pkl", "rb") as file:
+    lr_model = pickle.load(file)
+
 # Load dataset if needed
-data = pd.read_csv("/mnt/data/Dataset UTS_Gasal 2425.csv")
+data = pd.read_csv("Dataset UTS_Gasal 2425.csv")
 
 # Sidebar menu
 with st.sidebar:
     selected = option_menu('Streamlit UTS ML 24/25',
-                           ['Klasifikasi',
-                            'Regresi', 'Catatan'],
-                            default_index=0)
+                           ['Klasifikasi', 'Regresi', 'Catatan'],
+                           default_index=0)
 
 # Klasifikasi Properti
 if selected == 'Klasifikasi':
@@ -53,17 +51,13 @@ if selected == 'Klasifikasi':
                                        'isnewbuilt', 'hasstormprotector', 'basement', 'attic', 
                                        'garage', 'hasstorageroom', 'hasguestroom'])
 
-    # Debugging Output: Show data input shape and contents
-    st.write("Input Data Shape:", data_input.shape)
-    st.write("Input Data Preview:", data_input)
-
     # Predict button
     if st.button("Prediksi Kategori"):
         try:
             kategori = rf_model.predict(data_input)[0]
             st.success(f"Kategori Properti: {kategori}")
         except ValueError as e:
-            st.error(f"ValueError: {e}")
+            st.error(f"Error dalam prediksi: {e}")
 
 # Regresi Harga Properti
 if selected == 'Regresi':
@@ -97,17 +91,13 @@ if selected == 'Regresi':
                                        'isnewbuilt', 'hasstormprotector', 'basement', 'attic', 
                                        'garage', 'hasstorageroom', 'hasguestroom'])
 
-    # Debugging Output: Show data input shape and contents
-    st.write("Input Data Shape:", data_input.shape)
-    st.write("Input Data Preview:", data_input)
-
     # Predict button
     if st.button("Prediksi Harga"):
         try:
             harga = lr_model.predict(data_input)[0]
             st.success(f"Harga Properti: Rp {harga:,.0f}")
         except ValueError as e:
-            st.error(f"ValueError: {e}")
+            st.error(f"Error dalam prediksi: {e}")
 
 # Halaman Catatan
 if selected == 'Catatan':
@@ -119,4 +109,4 @@ if selected == 'Catatan':
     4. Referensi desain streamlit dapat di akses pada https://streamlit.io/
     5. Link streamlit design ini dapat di akses pada https://apputs-6qzfrvr4ufiyzhj84mrfkt7.streamlit.app/
     6. Library dan file requirements yang dibutuhkan untuk deploy online di github ada 5 yaitu streamlit, scikit-learn, pandas, numpy, streamlit-option-menu.
-    ''')\
+    ''')
