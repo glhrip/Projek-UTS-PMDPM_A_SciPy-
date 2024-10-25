@@ -3,10 +3,10 @@ import pandas as pd
 import pickle
 from streamlit_option_menu import option_menu
 
-with open("/mnt/data/LR_Properti_model.pkl", "rb") as file:
+with open("BestModel_REG_Lasso_SciPy.pkl", "rb") as file:
     lr_model = pickle.load(file)
 
-with open("/mnt/data/RF_Uts_model.pkl", "rb") as file:
+with open("BestModel_CLF_BesyModel_CLF_RF_SciPy.pkl", "rb") as file:
     rf_model = pickle.load(file)
 
 data = pd.read_csv("/mnt/data/Dataset UTS_Gasal 2425.csv")
